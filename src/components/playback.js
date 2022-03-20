@@ -34,8 +34,6 @@ export default function Playback() {
   //Get access token from redux
   const access_token = useSelector((state) => state.user.access_token);
 
-  console.log(access_token);
-
   const [firstPlay, setFirstPlay] = useState(true);
 
   //MUI classes
@@ -158,12 +156,12 @@ export default function Playback() {
   const play = () => {
     axios
       .put(
-        "https://api.spotify.com/v1/me/player/play?device_id=1171bae67f58c5399beffacc58236ef8990c94fb",
+        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
         { context_uri: "spotify:artist:5Pb27ujIyYb33zBqVysBkj" },
         { headers: { Authorization: "Bearer " + access_token } }
       )
       .catch((err) => {
-        console.log("error: ", err);
+        console.error("error: ", err);
       });
   };
 
@@ -179,14 +177,16 @@ export default function Playback() {
   };
 
   useEffect(async () => {
-    await loadSpotifyPlayer();
-
-    console.log("useffect");
 
     window.onSpotifyWebPlaybackSDKReady = () => {
       initializePlayer();
     };
 
+    if(!window.Spotify){
+      await loadSpotifyPlayer();
+    } 
+
+  
     //get last played song
     axios
       .get("https://api.spotify.com/v1/me/player/recently-played?limit=1", {

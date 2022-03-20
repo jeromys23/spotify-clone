@@ -4,9 +4,6 @@ import React, { useEffect, useState } from "react";
 //Redux
 import { useSelector } from "react-redux";
 
-//Axios
-import axios from "axios";
-
 //Pages / Components
 import Album from "../components/album";
 
@@ -19,7 +16,7 @@ import { BROWSE_URL } from "../spotify";
 
 const styles = makeStyles({
   content: {
-    width: "calc(100vw - 240px)",
+    width: "calc(100vw - 225px)",
     position: "absolute",
     right: 0,
     top: 0,
@@ -42,7 +39,6 @@ const styles = makeStyles({
     position: "relative",
     fontWeight: "bold",
   },
-  backgroundHome: {},
 });
 
 export default function Home() {

@@ -22,3 +22,4 @@ export const loginUrl = `${authEndpoint}?client_id=${client_id}&response_type=co
 //Spotify URLs
 export const BROWSE_URL = "https://api.spotify.com/v1/browse/categories";
 export const TOKEN_URL = "https://accounts.spotify.com/api/token";
+

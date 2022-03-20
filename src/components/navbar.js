@@ -1,5 +1,6 @@
 //React
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 //Axios
 import axios from "axios";
@@ -22,14 +23,18 @@ const styles = makeStyles({
     width: "207.5px",
     left: "0",
     top: "0",
-    height: "100vh",
+    height: "Calc(100vh - 105px)",
     backgroundColor: "#121212",
-    padding: "15px",
+    padding: '15px 0 0 15px',
     fontWeight: "bold",
+    fontSize: "14px",
+    color: "darkgrey",
+    display: 'flex',
+    flexDirection: 'column'
   },
   navlinkContainer: {
     position: "relative",
-    color: "darkgrey",
+    minHeight: '30px'    
   },
   navlink: {
     position: "absolute",
@@ -38,22 +43,38 @@ const styles = makeStyles({
     width: "100px",
   },
   navContent: {
-    fontSize: "14px",
     display: "flex",
     paddingBottom: "20px",
+  },
+  playlistContainer: {
+    paddingLeft: '10px',
+    height: '20px',
+    paddingTop: '20px'
   },
   greyDivider: {
     height: "1px",
     backgroundColor: "#303030",
     width: "100%",
   },
+  topNav: {
+    height: '250px'
+  },
   icon: {
     color: "darkgrey",
   },
+  playlistLink: {
+    color: 'inherit',
+    textDecoration: 'none',
+    transition: 'all 0.3s ease',
+    "&:hover": {
+      color: "rgb(250, 250, 250)"
+    }
+  }
 });
 
 export default function Navbar() {
   const access_token = useSelector((state) => state.user.access_token);
+
   //Styles
   const classes = styles();
 
@@ -63,7 +84,7 @@ export default function Navbar() {
 
   useEffect(() => {
     axios
-      .post("http://localhost:3001/playlists", { access_token })
+      .get("https://api.spotify.com/v1/me/playlists", { headers: {"Authorization" : `Bearer ${access_token}`}})
       .then((res) => {
         setPlaylists(res.data.items);
         setLoading(false);
@@ -75,37 +96,46 @@ export default function Navbar() {
 
   return (
     <div className={classes.navbar}>
-      <div className={classes.navContent}>
-        <HomeRoundedIcon sx={{ fontSize: 27 }} className={classes.icon} />
-        <div className={classes.navlinkContainer}>
-          <div className={classes.navlink}>Home</div>
+      <div className={classes.topNav}>
+        <div className={classes.navContent}>
+          <HomeRoundedIcon sx={{ fontSize: 27 }} className={classes.icon} />
+          <div className={classes.navlinkContainer}>
+            <div className={classes.navlink}>Home</div>
+          </div>
         </div>
-      </div>
-      <div className={classes.navContent}>
-        <SearchIcon sx={{ fontSize: 27 }} className={classes.icon} />
-        <div className={classes.navlinkContainer}>
-          <div className={classes.navlink}>Search</div>
+        <div className={classes.navContent}>
+          <SearchIcon sx={{ fontSize: 27 }} className={classes.icon} />
+          <div className={classes.navlinkContainer}>
+            <div className={classes.navlink}>Search</div>
+          </div>
         </div>
-      </div>
-      <div className={classes.navContent}>
-        <MenuBookIcon sx={{ fontSize: 27 }} className={classes.icon} />
-        <div className={classes.navlinkContainer}>
-          <div className={classes.navlink}>Your Library</div>
+        <div className={classes.navContent}>
+          <MenuBookIcon sx={{ fontSize: 27 }} className={classes.icon} />
+          <div className={classes.navlinkContainer}>
+            <div className={classes.navlink}>Your Library</div>
+          </div>
         </div>
-      </div>
-      <div className={classes.navContent}>
-        <AddBoxSharpIcon sx={{ fontSize: 27 }} className={classes.icon} />
-        <div className={classes.navlinkContainer}>
-          <div className={classes.navlink}>Add Playlist</div>
+        <div className={classes.navContent}>
+          <AddBoxSharpIcon sx={{ fontSize: 27 }} className={classes.icon} />
+          <div className={classes.navlinkContainer}>
+            <div className={classes.navlink}>Add Playlist</div>
+          </div>
         </div>
-      </div>
-      <div className={classes.navContent}>
-        <FavoriteSharpIcon sx={{ fontSize: 27 }} className={classes.icon} />
-        <div className={classes.navlinkContainer}>
-          <div className={classes.navlink}>Liked Songs</div>
+        <div className={classes.navContent}>
+          <FavoriteSharpIcon sx={{ fontSize: 27 }} className={classes.icon} />
+          <div className={classes.navlinkContainer}>
+            <div className={classes.navlink}>Liked Songs</div>
+          </div>
         </div>
+        <div className={classes.greyDivider}></div>
       </div>
-      <div className={classes.greyDivider}></div>
+      <div className={"bottomNav"}>
+        {!loading && playlists.map((playlist, i) => 
+        <div className={classes.playlistContainer} key={i}>
+            <Link to={`/playlist/${playlist.id}`} className={classes.playlistLink}><div>{playlist.name}</div></Link>
+        </div>
+        )}
+      </div>      
     </div>
   );
 }

@@ -9,3 +9,26 @@ body {
   color: var(--white);
   font-family: "Raleway", sans-serif;
 }
+
+.bottomNav {
+  flex: 1;
+  overflow-y: scroll;
+  padding-bottom: 10px;
+}
+
+.bottomNav::-webkit-scrollbar
+{
+	width: 12px;
+	background-color: transparent;
+}
+
+ 
+/* Handle */
+.bottomNav::-webkit-scrollbar-thumb {
+  background: darkgray; 
+}
+
+/* Handle on hover */
+.bottomNav::-webkit-scrollbar-thumb:hover {
+  background: rgb(100, 100, 100); 
+}
