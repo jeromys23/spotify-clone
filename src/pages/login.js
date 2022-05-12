@@ -12,6 +12,10 @@ import {
 
 //querystring
 import querystring from "query-string";
+import {Buffer} from 'buffer';
+
+//styles
+import { makeStyles } from "@material-ui/core/styles";
 
 //axios
 import axios from "axios";
@@ -20,8 +24,42 @@ import axios from "axios";
 import { login } from "../redux/userSlice";
 import { useDispatch } from "react-redux";
 
+
+const styles = makeStyles({
+  loginContainer: {
+    maxWidth: '500px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)'
+
+  },
+  btnLogin: {
+    background: 'var(--green)',
+    width: '175px',
+    height: '40px',
+    borderRadius: '20px',
+    color: 'var(--black)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    marginBottom: '50px',
+    fontSize: '30px',
+    fontWeight: 'bold'
+  }
+
+});
+
 export default function Login() {
   const dispatch = useDispatch();
+  const classes = styles();
+
 
   useEffect(() => {
     //Try to get user info from url
@@ -58,8 +96,20 @@ export default function Login() {
   }, []);
 
   return (
-    <div>
-      <a href={loginUrl}>Login</a>
+    <div className={classes.loginContainer}>
+      <div className={classes.header}>
+        Spotify Clone
+      </div>
+      <div>
+        <a href={loginUrl}>
+          <div className={classes.btnLogin}>
+            <div>Login</div>
+          </div>
+        </a>
+      </div>
+
+
+
     </div>
   );
 }

@@ -4,41 +4,35 @@ import React, { useEffect, useState } from "react";
 //Redux
 import { useSelector } from "react-redux";
 
-//Pages / Components
-import Album from "../components/album";
+//components
+import GeneralPageLayout from "../components/generalpagelayout";
+import ContentContainer from "../components/contentcontainer";
+import Tracklist from "../components/tracklist";
+
+
+//MUI
+import Box from "@material-ui/core/Box";
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Typography from '@material-ui/core/Typography'
 
 //Styles
 import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 
-//Spotify
-import { BROWSE_URL } from "../spotify";
+//Spotify helpers
+import { GetUserTopArtists, GetUserTopTracks, LAST4WEEKS, LAST6MONTHS, ALLTIME } from "../util/spotifyHelper";
 
 const styles = makeStyles({
-  content: {
-    width: "calc(100vw - 225px)",
-    position: "absolute",
-    right: 0,
-    top: 0,
-    height: "calc(100vh - 90px)",
-    overflowY: "scroll",
-    marginLeft: 200,
-    background:
-      "linear-gradient(0deg, rgba(18,18,18,1) 45%, rgba(81,46,95,1) 100%)",
+  homeContainer: {
+    background: "rgba(0, 0, 0, 0.25)",
+    flex: 1
   },
-  albumItem: {
-    display: "flex",
-    justifyContent: "center",
-    marginBottom: "40px",
-  },
-  header: {
-    fontSize: "100px",
-    paddingLeft: "10px",
-    height: "150px",
-    paddingTop: "80px",
-    position: "relative",
-    fontWeight: "bold",
-  },
+  topic: {
+    fontSize: '25px',
+    fontWeight: 'bold',
+    margin: '25px 0 20px 0'
+  }
 });
 
 export default function Home() {
@@ -46,36 +40,94 @@ export default function Home() {
 
   const classes = styles();
 
-  const [albums, setAlbums] = useState();
-  const [isLoading, setLoading] = useState(true);
+  //States for each time frame for both artists and genres
+  const [tracksShortFrame, setTracksShortFrame] = useState();
+  const [tracksMediumFrame, setTracksMediumFrame] = useState();
+  const [tracksLongFrame, setTracksLongFrame] = useState();
 
-  useEffect(() => {}, []);
+  const [artistsShortFrame, setArtistsShortFrame] = useState();
+  const [artistsMediumFrame, setArtistsMediumFrame] = useState();
+  const [artistsLongFrame, setArtistsLongFrame] = useState();
 
-  const albumComponents =
-    albums &&
-    albums.map((album, index) => (
-      <Grid
-        key={index}
-        item
-        xs={12}
-        sm={6}
-        md={4}
-        lg={3}
-        className={classes.albumItem}
+  //State for tabs
+  const [value, setValue] = useState(0);
+
+
+  
+  //Background - spotify color
+  const bg = `linear-gradient(0deg, rgba(25, 20, 20, 1) 0%, rgba(11,77,33,1) 100%)`
+
+  useEffect(() => {
+    GetUserTopArtists(access_token, LAST4WEEKS).then(res => setArtistsShortFrame(res));
+    GetUserTopArtists(access_token, LAST6MONTHS).then(res => setArtistsMediumFrame(res));
+    GetUserTopArtists(access_token, ALLTIME).then(res => setArtistsLongFrame(res));
+
+    GetUserTopTracks(access_token, LAST4WEEKS).then(res => setTracksShortFrame(res));
+    GetUserTopTracks(access_token, LAST6MONTHS).then(res => setTracksMediumFrame(res));
+    GetUserTopTracks(access_token, ALLTIME).then(res => setTracksLongFrame(res));
+
+  }, []);
+
+  const handleChange = (_, newValue) => {
+    setValue(newValue);
+  };
+
+  //MUI tab panels
+  function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+  
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`simple-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
+        {...other}
       >
-        <Album key={index} data={album}></Album>
-      </Grid>
-    ));
+        {value === index && (
+          <Box p={3}>
+            <Typography>{children}</Typography>
+          </Box>
+        )}
+      </div>
+    );
+  }
+
+  
+
 
   return (
-    <div className={classes.backgroundHome}>
-      <div className={classes.content}>
-        <div className={classes.header}>Browse</div>
 
-        <Grid container justifyContent="center" spacing={0}>
-          {isLoading ? "Loading" : albumComponents}
-        </Grid>
-      </div>
-    </div>
+    <Box>
+      <ContentContainer bg={bg}>  
+
+          <GeneralPageLayout data={{name: 'Your Favorite Music'}} type={''}>
+          </GeneralPageLayout>
+
+          <Box className={classes.homeContainer} padding={"30px"}>
+            <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+              <Tab disableRipple label="Last 4 Weeks" />
+              <Tab disableRipple label="Last 6 Months" />
+              <Tab disableRipple label="All Time" />
+            </Tabs>
+            <TabPanel value={value} index={0}>
+              <Box className={classes.topic}>Top Tracks</Box>
+              {tracksShortFrame && <Tracklist tracks={tracksShortFrame.items} showDateAdded={false} isAlbum={false}/>}
+              <Box className={classes.topic}>Top Artists</Box>
+            </TabPanel>
+            <TabPanel value={value} index={1}>
+              <Box className={classes.topic}>Top Tracks</Box>
+              {tracksMediumFrame && <Tracklist tracks={tracksMediumFrame.items} showDateAdded={false} isAlbum={false}/>}
+              <Box className={classes.topic}>Top Artists</Box>
+            </TabPanel>
+            <TabPanel value={value} index={2}>
+              <Box className={classes.topic}>Top Tracks</Box>
+              {tracksLongFrame && <Tracklist tracks={tracksLongFrame.items} showDateAdded={false} isAlbum={false}/>}
+              <Box className={classes.topic}>Top Artists</Box>
+            </TabPanel>
+          </Box>
+          
+      </ContentContainer>
+    </Box>
   );
 }

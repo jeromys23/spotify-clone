@@ -4,10 +4,14 @@
   --black: #191414;
 }
 
+.MuiTabs-indicator {
+  background-color: var(--green) !important;
+}
+
 body {
   background-color: var(--black);
   color: var(--white);
-  font-family: "Raleway", sans-serif;
+  font-family: "Raleway", sans-serif !important;
 }
 
 .bottomNav {

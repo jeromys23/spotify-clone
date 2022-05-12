@@ -1,14 +1,21 @@
 //React
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
 //Redux
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setURI } from "../redux/spotifySlice";
 
 //Material UI
 import { makeStyles } from "@material-ui/core";
-import PlayCircleIcon from "@mui/icons-material/PlayCircle";
-import PauseCircleIcon from "@mui/icons-material/PauseCircle";
-import axios from "axios";
+import Box from "@material-ui/core/Box"
+
+import SpotifyPlayer from "react-spotify-web-playback"
+
+//spotify helpers
+import { 
+  GetRecentlyPlayed 
+} from "../util/spotifyHelper";
+
 
 //CSS styles
 const styles = makeStyles({
@@ -20,203 +27,66 @@ const styles = makeStyles({
     left: "0",
     bottom: "0",
     display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  playbackButtons: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  }
 });
 
 export default function Playback() {
+
+  const dispatch = useDispatch();
+
   //Get access token from redux
   const access_token = useSelector((state) => state.user.access_token);
+  //Get current URI
+  const URI = useSelector((state) => state.spotify.URI)
 
-  const [firstPlay, setFirstPlay] = useState(true);
+  const [play, setPlay] = useState(false);
+  const [firstLoad, setFirstLoad] = useState(true);
 
   //MUI classes
   const classes = styles();
 
-  //Spotify player html reference
-  let spotifyPlayer = useRef(null);
+  useEffect(() => {
 
-  /** PLAYER INIT */
-  /********************/
+    if(firstLoad) {
+      URI && setFirstLoad(false);
+    } else {
+      setPlay(true);
+    }
 
-  //Initialize spotify player
-  const initializePlayer = () => {
-    spotifyPlayer = new window.Spotify.Player({
-      name: "Spotify Player",
-      getOAuthToken: (callback) => {
-        callback(access_token);
-      },
+  }, [URI])
+
+  useEffect(() => {
+
+    GetRecentlyPlayed(access_token).then(res => {
+      let context = res.items[0].context
+      let context_uri = context && context.uri;
+      let track_uri = res.items[0].track.uri;
+      dispatch(setURI(context_uri !== null ? context_uri : track_uri))
     });
-
-    // Error handling
-    spotifyPlayer.addListener("initialization_error", ({ message }) => {
-      console.log(message);
-    });
-    spotifyPlayer.addListener("authentication_error", ({ message }) => {
-      console.log(message);
-    });
-    spotifyPlayer.addListener("account_error", ({ message }) => {
-      console.log(message);
-    });
-    spotifyPlayer.addListener("playback_error", ({ message }) => {
-      console.log(message);
-    });
-
-    // Ready
-    spotifyPlayer.addListener("ready", ({ device_id }) => {
-      console.log("Ready with Device ID", device_id);
-      setDeviceId(device_id);
-    });
-
-    // Playback status updates
-    spotifyPlayer.addListener("player_state_changed", (state) => {
-      try {
-        if (state) {
-          const {
-            duration,
-            loading,
-            paused,
-            position,
-            repeat_mode,
-            shuffle,
-            track_window,
-          } = state;
-          //setCurrentTrack({ ...current_track, play: !paused });
-          setPlayback((state) => ({
-            ...state,
-            loaded: true,
-            loading: loading,
-            playing: !paused,
-            shuffle: shuffle,
-            repeat: repeat_mode !== 0,
-            progress: position,
-            duration: duration,
-          }));
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    });
-
-    spotifyPlayer.connect();
-  };
-
-  function loadSpotifyPlayer() {
-    return new Promise((resolve, reject) => {
-      const scriptTag = document.getElementById("spotify-player");
-
-      if (!scriptTag) {
-        const script = document.createElement("script");
-
-        script.id = "spotify-player";
-        script.type = "text/javascript";
-        script.async = false;
-        script.defer = true;
-        script.src = "https://sdk.scdn.co/spotify-player.js";
-        script.onload = () => resolve();
-        script.onerror = (error) =>
-          reject(new Error(`loadScript: ${error.message}`));
-
-        document.head.appendChild(script);
-      } else {
-        resolve();
-      }
-    });
-  }
-
-  //   // Not Ready
-  //   spotifyPlayer.addListener("not_ready", ({ device_id }) => {
-  //     console.log("Device ID has gone offline", device_id);
-  //   });
-
-  // Connect the player!
-  // };
-  /********************/
-
-  //Initialize states
-  const [deviceId, setDeviceId] = useState();
-  const [playback, setPlayback] = useState({
-    loaded: false,
-    loading: false,
-    playing: false,
-    shuffle: false,
-    repeat: false,
-    progress: 0,
-    duration: 0,
-  });
-  const [currentTrack, setCurrentTrack] = useState();
-
-  //Toggle user play
-  const play = () => {
-    axios
-      .put(
-        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
-        { context_uri: "spotify:artist:5Pb27ujIyYb33zBqVysBkj" },
-        { headers: { Authorization: "Bearer " + access_token } }
-      )
-      .catch((err) => {
-        console.error("error: ", err);
-      });
-  };
-
-  //Toggle user pause
-  const pause = () => {
-    axios
-      .put("https://api.spotify.com/v1/me/player/pause", null, {
-        headers: { Authorization: "Bearer " + access_token },
-      })
-      .catch((err) => {
-        console.log("error: ", err);
-      });
-  };
-
-  useEffect(async () => {
-
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      initializePlayer();
-    };
-
-    if(!window.Spotify){
-      await loadSpotifyPlayer();
-    } 
-
-  
-    //get last played song
-    axios
-      .get("https://api.spotify.com/v1/me/player/recently-played?limit=1", {
-        headers: { Authorization: "Bearer " + access_token },
-      })
-      .then((response) => {
-        let { items } = response.data;
-        let track = items[0].track;
-        setCurrentTrack(track.uri);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-
-    // eslint-disable-next-line
-  }, []);
+  }, [])
 
   return (
-    <div className={classes.playback}>
-      <div className={classes.playbackButtons}>
-        {playback.loaded && playback.playing ? (
-          <div onClick={() => pause()}>
-            <PauseCircleIcon fontSize={"large"} />
-          </div>
-        ) : (
-          <div onClick={() => play()}>
-            <PlayCircleIcon fontSize={"large"} />
-          </div>
-        )}
-      </div>
-    </div>
+    <Box className={classes.playback}>
+       {access_token &&
+       <SpotifyPlayer
+        token={access_token}
+        showSaveIcon
+        magnifySliderOnHover
+        callback={state => !state.isPlaying && setPlay(false)}
+        play={play}
+        uris={URI ? [URI] : []}
+        styles={{
+          activeColor: "#fff",
+          bgColor: "#191414",
+          color: "#fff",
+          loaderColor: "#fff",
+          sliderColor: "#1cb954",
+          trackArtistColor: "#ccc",
+          trackNameColor: "#fff",
+          height: "90px",
+        }}
+    />}
+      
+    </Box>
   );
 }

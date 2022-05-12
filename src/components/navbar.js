@@ -56,9 +56,6 @@ const styles = makeStyles({
     backgroundColor: "#303030",
     width: "100%",
   },
-  topNav: {
-    height: '250px'
-  },
   icon: {
     color: "darkgrey",
   },
@@ -96,29 +93,11 @@ export default function Navbar() {
 
   return (
     <div className={classes.navbar}>
-      <div className={classes.topNav}>
+      <div>
         <div className={classes.navContent}>
           <HomeRoundedIcon sx={{ fontSize: 27 }} className={classes.icon} />
           <div className={classes.navlinkContainer}>
-            <div className={classes.navlink}>Home</div>
-          </div>
-        </div>
-        <div className={classes.navContent}>
-          <SearchIcon sx={{ fontSize: 27 }} className={classes.icon} />
-          <div className={classes.navlinkContainer}>
-            <div className={classes.navlink}>Search</div>
-          </div>
-        </div>
-        <div className={classes.navContent}>
-          <MenuBookIcon sx={{ fontSize: 27 }} className={classes.icon} />
-          <div className={classes.navlinkContainer}>
-            <div className={classes.navlink}>Your Library</div>
-          </div>
-        </div>
-        <div className={classes.navContent}>
-          <AddBoxSharpIcon sx={{ fontSize: 27 }} className={classes.icon} />
-          <div className={classes.navlinkContainer}>
-            <div className={classes.navlink}>Add Playlist</div>
+            <Link to={'/'} className={classes.playlistLink}><div className={classes.navlink}>Home</div></Link>
           </div>
         </div>
         <div className={classes.navContent}>

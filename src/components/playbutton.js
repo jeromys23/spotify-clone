@@ -3,18 +3,20 @@ import React from 'react'
 import {PlayCircle} from "@mui/icons-material";
 import Box from "@mui/material/Box"
 
-export default function Playbutton({tracks}) {
+import { useDispatch } from 'react-redux';
+import { setURI } from '../redux/spotifySlice';
 
-  const uris = tracks.map(item => (
-    item.track.uri
-  ));
+export default function Playbutton({tracks, uri}) {
+
+  const dispatch = useDispatch();
+
+  const uris = tracks
+    .map(item => (item.uri)
+  );
 
   const handlePlayClick = () => {
-
-  };
-
-  console.log("uris: ", uris);
-
+    uri && dispatch(setURI(uri));
+  }
 
   return (
     <Box sx={{height: '100px', marginLeft: '20px', marginTop: '20px'}}>
