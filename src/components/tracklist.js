@@ -3,14 +3,19 @@ import React, { lazy, useEffect, useState } from 'react'
 //MUI
 import { makeStyles } from "@material-ui/core/styles";
 import Box from "@mui/material/Box";
-import { PlayArrow } from '@mui/icons-material';
+import { useTheme } from '@material-ui/core/styles';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+
+//Icons
+import PlayArrow  from '@mui/icons-material/PlayArrow';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+
+//Components
 import { Link } from "react-router-dom";
 
-import { useDispatch } from 'react-redux';
-import { setURI } from '../redux/spotifySlice';
-
-
+//Redux
+import { useDispatch, useSelector } from 'react-redux';
+import { setURI, setPlaying } from '../redux/spotifySlice';
 
 //styles
 const styles = makeStyles({
@@ -62,22 +67,32 @@ const styles = makeStyles({
     color: 'inherit',
     "&:hover": {
       textDecoration: "underline", 
-    }
+    },
+  },
+  rowName: {
+    fontSize: '17px',
+    paddingBottom: '2px'
   }
 });
 
 
 export default function Tracklist(props) {  
 
+
   const classes = styles();
-  const [activeRow, setActiveRow] = useState(-1);
+  const [hoverRow, setHoverRow] = useState(-1);
+  const [playingRow, setPlayingRow] = useState(-1);
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.up('sm'));
+  const isPlaying = useSelector((state) => state.spotify.isPlaying)
+  const uri = useSelector((state) => state.spotify.URI)
 
   const dispatch = useDispatch();
 
   const handlePlay = (uri) => {
     dispatch(setURI(uri))
+    !isPlaying && dispatch(setPlaying(true));
   }
-
 
   
   return (
@@ -86,25 +101,24 @@ export default function Tracklist(props) {
         
         <tbody>
           <tr className={classes.tableHeader}>
-            <th style={{width: '4%', paddingLeft: '10px'}} className={classes.tableHeaderText}>#</th>
+            <th style={{width: '7%', paddingLeft: '10px'}} className={classes.tableHeaderText}>#</th>
             <th style={{width: props.isAlbum ? '70%' : '40%'}} className={classes.tableHeaderText}>TITLE</th>
-            {!props.isAlbum && <th style={{width: '30%'}} className={classes.tableHeaderText}>ALBUM</th>}
-            {props.showDateAdded && <th style={{width: '12%'}} className={classes.tableHeaderText}>DATE ADDED</th>}
-            <th style={{width: '12%'}} className={classes.tableHeaderText}><AccessTimeIcon/></th>
+            {!props.isAlbum && matches && <th style={{width: '30%'}} className={classes.tableHeaderText}>ALBUM</th>}
+            {matches && <th style={{width: '12%'}} className={classes.tableHeaderText}><AccessTimeIcon/></th>}
           </tr>
           <tr>
             <td className={classes.rowDivider} colSpan={5}></td>
           </tr>
           {props.tracks.map((row, i) => 
             row &&
-            <tr key={i} className={classes.trackRow} onMouseEnter={() => setActiveRow(i)} onMouseLeave={() => setActiveRow(-1)}>
+            <tr key={i} className={classes.trackRow} style={{color: (row.uri == uri ? 'var(--green)' : '')}} onClick={() => handlePlay(row.uri)} onMouseEnter={() => setHoverRow(i)} onMouseLeave={() => setHoverRow(-1)}>
               <td className={classes.tableCell} style={{borderRadius: '5px 0 0 5px', paddingLeft: '10px'}}>
-                <div onClick={() => handlePlay(row.uri)}>
-                  {i == activeRow ? 
+                <Box width={'25px'}>
+                  {i == hoverRow && i != playingRow ? 
                     <PlayArrow/>
                     : 
                     i + 1}
-                </div>
+                </Box>
               </td>
               <td className={classes.tableCell}>
                 <Box className={classes.songArtistContainer} >
@@ -113,12 +127,13 @@ export default function Tracklist(props) {
                      <img className={classes.trackImage} src={row.album.images[row.album.images.length - 1].url} alt={row.name} loading={lazy}/>
                   </Box>}
                   <Box className={classes.trackText}>
-                    <Box fontSize={'17px'} color={'#fff'} paddingBottom={'2px'}> {row.name}</Box>
+                    <Box className={classes.rowName} style={{color: (row.uri == uri ? 'var(--green)' : '#fff')}} > {row.name}</Box>
                     {!props.isAlbum && 
                     <Box paddingTop={'2px'}>
                       {row.artists.map((artist, index, artists) =>
                         <React.Fragment key={index}>
-                          <Link className={classes.artistAlbumLink} to={`/artist/${artist.id}`}>{artist.name}</Link> 
+                          {matches && <Link className={classes.artistAlbumLink} to={`/artist/${artist.id}`}>{artist.name}</Link>}
+                          {!matches && <Box display={'inline'} className={classes.artistAlbumLink}>{artist.name}</Box>}
                           {index === artists.length - 1 ? "" : ", "}
                         </React.Fragment>
                       )}
@@ -126,19 +141,14 @@ export default function Tracklist(props) {
                   </Box>             
                 </Box>
               </td>
-              {!props.isAlbum &&
+              {!props.isAlbum && matches &&
               <td className={classes.tableCell}>
                  <Link className={classes.artistAlbumLink} to={`/album/${row.album.id}`}>{row.album.name}</Link>
               </td>}
 
-              {props.showDateAdded &&
-              <td className={classes.tableCell}>
-                {new Date(props.showDateAdded).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}
-              </td>}
-
-              <td className={classes.tableCell} style={{borderRadius: '0 5px 5px 0'}}>
+              {matches && <td className={classes.tableCell} style={{borderRadius: '0 5px 5px 0'}}>
                 {Math.floor(row.duration_ms / 60000)}:{Math.floor((row.duration_ms % 60000) / 1000).toString().padStart(2, '0')}
-              </td>
+              </td>}
             </tr>
           )}
         </tbody>

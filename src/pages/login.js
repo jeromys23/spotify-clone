@@ -1,28 +1,16 @@
 //axios
 import React, { useEffect } from "react";
 
-//spotify
-import {
-  loginUrl,
-  redirect_uri,
-  TOKEN_URL,
-  client_id,
-  client_secret,
-} from "../spotify";
 
-//querystring
-import querystring from "query-string";
-import {Buffer} from 'buffer';
+//spotify helpers
+import {GetAccessToken, LOGIN_URL} from '../util/spotifyHelper'
 
 //styles
 import { makeStyles } from "@material-ui/core/styles";
 
-//axios
-import axios from "axios";
-
 //redux
 import { login } from "../redux/userSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 
 const styles = makeStyles({
@@ -60,40 +48,27 @@ export default function Login() {
   const dispatch = useDispatch();
   const classes = styles();
 
+  //Try to get token from redux
+  const access_token = useSelector((state) => state.user.access_token);
 
   useEffect(() => {
-    //Try to get user info from url
-    let code = new URLSearchParams(window.location.search).get("code");
 
-    //If there is user information, call spotify to exchange code for token
-    if (code) {
-      //auth params
-      var authOptions = {
-        body: {
-          code: code,
-          redirect_uri: redirect_uri,
-          grant_type: "authorization_code",
-        },
-        headers: {
-          Authorization:
-            "Basic " +
-            new Buffer.from(client_id + ":" + client_secret).toString("base64"),
-        },
-        json: true,
-      };
+    //If not in redux, we are not logged in
+    if(!access_token) {
+    
+      //Try to get user info from url
+      let code = new URLSearchParams(window.location.search).get("code");
 
-      axios
-        .post(TOKEN_URL, querystring.stringify(authOptions.body), {
-          headers: authOptions.headers,
-        })
-        .then((res) => {
-          dispatch(login(res.data));
-        });
+      //If there is user information, call spotify to exchange code for token
+      if (code) {
 
-      // Get rid of code from url
-      window.history.pushState({}, null, "/");
+        GetAccessToken(code).then(res => dispatch(login(res)));
+
+        // Get rid of code from url
+        window.history.pushState({}, null, "/");
+      }
     }
-  }, []);
+  }, [access_token]);
 
   return (
     <div className={classes.loginContainer}>
@@ -101,15 +76,12 @@ export default function Login() {
         Spotify Clone
       </div>
       <div>
-        <a href={loginUrl}>
+        <a href={LOGIN_URL}>
           <div className={classes.btnLogin}>
             <div>Login</div>
           </div>
         </a>
       </div>
-
-
-
     </div>
   );
 }

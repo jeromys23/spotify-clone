@@ -3,10 +3,12 @@ import React, { useState, useEffect } from "react";
 
 //Redux
 import { useSelector, useDispatch } from "react-redux";
-import { setURI } from "../redux/spotifySlice";
+import { setURI, setPlaying } from "../redux/spotifySlice";
 
 //Material UI
 import { makeStyles } from "@material-ui/core";
+import { useTheme } from '@material-ui/core/styles';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Box from "@material-ui/core/Box"
 
 import SpotifyPlayer from "react-spotify-web-playback"
@@ -17,18 +19,18 @@ import {
 } from "../util/spotifyHelper";
 
 
+
 //CSS styles
-const styles = makeStyles({
+const styles = makeStyles((theme) => ({
   playback: {
     position: "fixed",
-    height: "90px",
     width: "100vw",
     borderTop: "1px solid #303030",
     left: "0",
     bottom: "0",
     display: "flex",
   }
-});
+}));
 
 export default function Playback() {
 
@@ -37,20 +39,24 @@ export default function Playback() {
   //Get access token from redux
   const access_token = useSelector((state) => state.user.access_token);
   //Get current URI
-  const URI = useSelector((state) => state.spotify.URI)
+  const URI = useSelector((state) => state.spotify.URI);
+  const isPlaying = useSelector((state) => state.spotify.isPlaying)
 
-  const [play, setPlay] = useState(false);
+
+  const [playerHeight, setPlayerHeight] = useState('75px')
   const [firstLoad, setFirstLoad] = useState(true);
 
   //MUI classes
   const classes = styles();
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
 
     if(firstLoad) {
       URI && setFirstLoad(false);
     } else {
-      setPlay(true);
+      setPlaying(true);
     }
 
   }, [URI])
@@ -65,15 +71,27 @@ export default function Playback() {
     });
   }, [])
 
+  useEffect(() => {
+    setPlayerHeight('75px')
+    if(matches) {
+      setPlayerHeight('210px')
+    }
+  }, [matches])
+
+  function updateSpotifyState(state) {
+    dispatch(setPlaying(state.isPlaying));
+  }
+
+
   return (
-    <Box className={classes.playback}>
+    <Box className={classes.playback} height={playerHeight}>
        {access_token &&
        <SpotifyPlayer
         token={access_token}
-        showSaveIcon
         magnifySliderOnHover
-        callback={state => !state.isPlaying && setPlay(false)}
-        play={play}
+        syncExternalDevice        
+        callback={state => updateSpotifyState(state)}
+        play={isPlaying}
         uris={URI ? [URI] : []}
         styles={{
           activeColor: "#fff",
@@ -83,7 +101,7 @@ export default function Playback() {
           sliderColor: "#1cb954",
           trackArtistColor: "#ccc",
           trackNameColor: "#fff",
-          height: "90px",
+          height: '75px',
         }}
     />}
       

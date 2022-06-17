@@ -1,13 +1,16 @@
 //React
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
-//Redux
-import { useSelector } from "react-redux";
+//GraphQL
+import { useQuery } from '@apollo/client';
+import {GetUserTopMedia} from "../graphql/homeQuery";
 
 //components
 import GeneralPageLayout from "../components/generalpagelayout";
 import ContentContainer from "../components/contentcontainer";
 import Tracklist from "../components/tracklist";
+import ItemGrid from "../components/itemGrid";
+import Loading from "../components/loading";
 
 
 //MUI
@@ -17,56 +20,31 @@ import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography'
 
 //Styles
-import { makeStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
+import { useGlobalStyles } from "../Styles";
 
 //Spotify helpers
-import { GetUserTopArtists, GetUserTopTracks, LAST4WEEKS, LAST6MONTHS, ALLTIME } from "../util/spotifyHelper";
+import { LAST4WEEKS, LAST6MONTHS, ALLTIME } from "../util/spotifyHelper";
 
-const styles = makeStyles({
-  homeContainer: {
-    background: "rgba(0, 0, 0, 0.25)",
-    flex: 1
-  },
-  topic: {
-    fontSize: '25px',
-    fontWeight: 'bold',
-    margin: '25px 0 20px 0'
-  }
-});
 
 export default function Home() {
-  const access_token = useSelector((state) => state.user.access_token);
 
-  const classes = styles();
+  const classes = useGlobalStyles();
 
-  //States for each time frame for both artists and genres
-  const [tracksShortFrame, setTracksShortFrame] = useState();
-  const [tracksMediumFrame, setTracksMediumFrame] = useState();
-  const [tracksLongFrame, setTracksLongFrame] = useState();
-
-  const [artistsShortFrame, setArtistsShortFrame] = useState();
-  const [artistsMediumFrame, setArtistsMediumFrame] = useState();
-  const [artistsLongFrame, setArtistsLongFrame] = useState();
+  //GraphQL Query for top songs and artists
+  const { loading, error, data } = useQuery(GetUserTopMedia, {
+    variables:  {
+      timeRangeShort: LAST4WEEKS,
+      timeRangeMedium: LAST6MONTHS,
+      timeRangeLong: ALLTIME
+    },
+  })
 
   //State for tabs
   const [value, setValue] = useState(0);
 
-
-  
   //Background - spotify color
   const bg = `linear-gradient(0deg, rgba(25, 20, 20, 1) 0%, rgba(11,77,33,1) 100%)`
 
-  useEffect(() => {
-    GetUserTopArtists(access_token, LAST4WEEKS).then(res => setArtistsShortFrame(res));
-    GetUserTopArtists(access_token, LAST6MONTHS).then(res => setArtistsMediumFrame(res));
-    GetUserTopArtists(access_token, ALLTIME).then(res => setArtistsLongFrame(res));
-
-    GetUserTopTracks(access_token, LAST4WEEKS).then(res => setTracksShortFrame(res));
-    GetUserTopTracks(access_token, LAST6MONTHS).then(res => setTracksMediumFrame(res));
-    GetUserTopTracks(access_token, ALLTIME).then(res => setTracksLongFrame(res));
-
-  }, []);
 
   const handleChange = (_, newValue) => {
     setValue(newValue);
@@ -93,18 +71,18 @@ export default function Home() {
     );
   }
 
-  
-
+  if(loading) return <Loading/>
+  if(error) return null;
 
   return (
 
     <Box>
-      <ContentContainer bg={bg}>  
+      <ContentContainer colorString={bg}>  
 
           <GeneralPageLayout data={{name: 'Your Favorite Music'}} type={''}>
           </GeneralPageLayout>
 
-          <Box className={classes.homeContainer} padding={"30px"}>
+          <Box className={classes.playlistContainer}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
               <Tab disableRipple label="Last 4 Weeks" />
               <Tab disableRipple label="Last 6 Months" />
@@ -112,18 +90,24 @@ export default function Home() {
             </Tabs>
             <TabPanel value={value} index={0}>
               <Box className={classes.topic}>Top Tracks</Box>
-              {tracksShortFrame && <Tracklist tracks={tracksShortFrame.items} showDateAdded={false} isAlbum={false}/>}
+              <Tracklist tracks={data.ShortTermTracks.items} isAlbum={false}/>
+
               <Box className={classes.topic}>Top Artists</Box>
+              <ItemGrid items={data.ShortTermArtists.items}/>
             </TabPanel>
             <TabPanel value={value} index={1}>
               <Box className={classes.topic}>Top Tracks</Box>
-              {tracksMediumFrame && <Tracklist tracks={tracksMediumFrame.items} showDateAdded={false} isAlbum={false}/>}
+              <Tracklist tracks={data.MediumTermTracks.items} isAlbum={false}/>
+
               <Box className={classes.topic}>Top Artists</Box>
+              <ItemGrid items={data.MediumTermArtists.items}/>
             </TabPanel>
             <TabPanel value={value} index={2}>
               <Box className={classes.topic}>Top Tracks</Box>
-              {tracksLongFrame && <Tracklist tracks={tracksLongFrame.items} showDateAdded={false} isAlbum={false}/>}
+              <Tracklist tracks={data.LongTermTracks.items} isAlbum={false}/>
+
               <Box className={classes.topic}>Top Artists</Box>
+              <ItemGrid items={data.LongTermArtists.items}/>
             </TabPanel>
           </Box>
           

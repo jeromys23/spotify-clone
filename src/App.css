@@ -4,6 +4,10 @@
   --black: #191414;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 .MuiTabs-indicator {
   background-color: var(--green) !important;
 }
@@ -36,3 +40,10 @@ body {
 .bottomNav::-webkit-scrollbar-thumb:hover {
   background: rgb(100, 100, 100); 
 }
+
+a {
+  color: inherit !important;
+  text-decoration: none;
+}
+
+

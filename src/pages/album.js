@@ -1,13 +1,11 @@
-import React, {useState, useEffect} from 'react'
+import React from 'react'
 
 //To get id from url
 import { useParams } from "react-router-dom";
 
-//Spotify api call
-import { GetAlbum } from "../util/spotifyHelper"
-
-//Redux
-import { useSelector } from "react-redux";
+//Graphql
+import { useQuery } from '@apollo/client';
+import { GetAlbumInfo } from '../graphql/albumQuery';
 
 //MUI
 import Box from "@material-ui/core/Box"
@@ -18,102 +16,62 @@ import Playbutton from '../components/playbutton';
 import Tracklist from '../components/tracklist';
 import { Link } from 'react-router-dom';
 import ContentContainer from '../components/contentcontainer';
+import Loading from '../components/loading';
 
-import FastAverageColor from 'fast-average-color';
-
-import { makeStyles } from "@material-ui/core/styles";
 
 //styles
-const styles = makeStyles({
-    playlistContainer: {
-      background: "rgba(0, 0, 0, 0.25)",
-      flex: 1
-    },
-    topic: {
-      fontSize: '25px',
-      fontWeight: 'bold',
-      margin: '25px 0 20px 0'
-    },
-    artistLink: {
-        textDecoration: 'none',
-        color: '#fff',
-        "&:hover": {
-          textDecoration: "underline"
-        }
-      }
-  });
+import { useGlobalStyles } from '../Styles';
 
 export default function Album() {
 
-    const classes = styles();
+  const classes = useGlobalStyles();
 
-    const access_token = useSelector((state) => state.user.access_token);
-    let { slug } = useParams();
+  let { slug } = useParams();
 
-    const [album, setAlbum] = useState();
-    const [albumData, setAlbumData] = useState();
-    const [bg, setBg] = useState();
+  const { loading, error, data } = useQuery(GetAlbumInfo, {
+    variables:  {
+      albumId: slug
+    },
+  })
 
-    useEffect(() => {
-      if(album) {
-        
-        let image = album.images.length >= 2 ? album.images[1].url : album.images[album.images.length - 1].url;
+  if(loading) return <Loading/>
+  if(error) return error.message;
+    
+  function GetPageLayoutData(album) {
+    let image = album.images.length >= 2 ? album.images[1].url : album.images[album.images.length - 1].url;
 
-        let data = {
-          image,
-          name: album.name
-        }
-
-        const fac = new FastAverageColor();
-
-        fac.getColorAsync(image)
-        .then(color => {
-          let colorString = `linear-gradient(0deg, rgba(25, 20, 20, 1) 0%, ${color.rgba} 100%)`
-          setBg(colorString);
-
-        })
-        .catch(e => {
-            console.log(e);
-        });
-        
-        setAlbumData(data);
-
-      }
-    }, [album])
-
-    useEffect(() => {
-        if (slug) {
-          GetAlbum(access_token, slug).then((res) => setAlbum(res));
-        }
-      }, [slug]);
-
+    return {
+      image,
+      name: album.name
+    }
+  }
 
   return (
     <Box>
-      {album && albumData && bg &&
-       <ContentContainer bg={bg}>
+       <ContentContainer image={data.Album.images.length >= 2 ? data.Album.images[1].url : data.Album.images[data.Album.images.length - 1].url}>
 
-          <GeneralPageLayout data={albumData} type={album.album_type}>
+          <GeneralPageLayout data={GetPageLayoutData(data.Album)} type={"Album"}>
               <Box display={'flex'}>
-                  {album.artists.map((artist, index, artists) =>
+                  {data.Album.artists.map((artist, index, artists) =>
                       <React.Fragment>
                         <Link className={classes.artistLink} to={`/artist/${artist.id}`}>{artist.name}</Link> 
-                        {index === artists.length - 1 ? "" : ", "}
+                        {index === artists.length - 1 ? "" : <span>,&nbsp;</span>}
                       </React.Fragment>
                   )}
                   &nbsp;&#8226;&nbsp;
-                  {new Date(album.release_date).toLocaleDateString('en-US', {year: 'numeric'})}
+                  {new Date(data.Album.release_date).toLocaleDateString('en-US', {year: 'numeric'})}
               </Box>
           </GeneralPageLayout>
 
-          {album && album.tracks.items.length > 0 && 
           <Box className={classes.playlistContainer} padding={"30px"}>
-            <Playbutton tracks={album.tracks.items} uri={album.uri} />
+            <Box className={classes.playButtonContainer}>
+              <Playbutton tracks={data.Album.tracks.items} uri={data.Album.uri} />
+            </Box>
             <Box className={classes.topic}>Tracks</Box>
-            <Tracklist tracks={album.tracks.items} showDateAdded={false} isAlbum={true} />
-          </Box>}
+            <Tracklist tracks={data.Album.tracks.items} showDateAdded={false} isAlbum={true} />
+          </Box>
 
-        </ContentContainer>}
+        </ContentContainer>
     </Box>
   )
 }

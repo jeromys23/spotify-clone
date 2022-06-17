@@ -3,53 +3,86 @@ import React, {useState, useEffect} from 'react'
 //To get id from url
 import { useParams } from "react-router-dom";
 
-//Spotify api call
-import { GetArtist, GetArtistTopSongs, GetArtistAlbums } from "../util/spotifyHelper"
+//Grpahql 
+import { useQuery } from '@apollo/client';
+import { GetArtistInfo } from '../graphql/artistQuery'
 
-//Redux
-import { useSelector } from "react-redux";
 
 //MUI
 import Box from "@material-ui/core/Box"
-import Grid from "@material-ui/core/Grid"
 
 //components
 import GeneralPageLayout from '../components/generalpagelayout';
 import Playbutton from '../components/playbutton';
 import Tracklist from '../components/tracklist';
-import AlbumGrid from '../components/albumGrid';
+import ItemGrid from '../components/itemGrid';
 import ContentContainer from '../components/contentcontainer';
+import Loading from "../components/loading"
 
-import FastAverageColor from 'fast-average-color';
-
-import { makeStyles } from "@material-ui/core/styles";
-
-
-//styles
-const styles = makeStyles({
-    playlistContainer: {
-      background: "rgba(0, 0, 0, 0.25)",
-      flex: 1
-    },
-    topic: {
-      fontSize: '25px',
-      fontWeight: 'bold',
-      margin: '25px 0 20px 0'
-    }
-  });
+import { useGlobalStyles } from '../Styles';
 
 export default function Artist() {
 
-    const classes = styles();
+  const classes = useGlobalStyles();
 
-    const access_token = useSelector((state) => state.user.access_token);
-    let { slug } = useParams();
+  let { slug } = useParams();
+   
+  const { loading, error, data } = useQuery(GetArtistInfo, {
+    variables:  {
+      artistId: slug
+    },
+  })
 
-    const [artist, setArtist] = useState();
-    const [bg, setBg] = useState();
-    const [artistData, setArtistData] = useState();
-    const [artistTopSongs, setArtistTopSongs] = useState();
-    const [artistAlbums, setArtistAlbums] = useState();
+  if(loading) return <Loading/>
+  if(error) return error.message;
+
+  function GetPageLayoutData(artist) {
+    let image = artist.images.length >= 2 ? artist.images[1].url : artist.images[artist.images.length - 1].url;
+
+    return {
+      image,
+      name: artist.name
+    }
+  }
+  
+
+  return (
+    <Box>
+
+      <ContentContainer image={data.Artist.images.length >= 2 ? data.Artist.images[1].url : data.Artist.images[data.Artist.images.length - 1].url}>
+
+        <GeneralPageLayout data={GetPageLayoutData(data.Artist)} type={'artist'}>
+            <b>{data.Artist.followers.total.toLocaleString("en-US")} </b> &nbsp;Followers
+        </GeneralPageLayout>
+
+        <Box className={classes.playlistContainer}>
+          <Box className={classes.playButtonContainer}>
+            <Playbutton tracks={data.ArtistTopSongs.tracks} uri={data.Artist.uri} />
+          </Box>
+          <Box className={classes.topic}>Top Tracks</Box>
+          <Tracklist tracks={data.ArtistTopSongs.tracks.slice(0,5)} isAlbum={false} />
+
+          <Box>
+            <Box className={classes.topic}>Albums</Box>
+            <ItemGrid items={data.ArtistAlbums.items} metadata={'year'}/>
+          </Box>
+        </Box>
+
+      </ContentContainer>
+    </Box>
+  )
+}
+
+
+
+/**
+ * 
+    /** 
+    // const [artist, setArtist] = useState();
+    // const [bg, setBg] = useState();
+    // const [artistData, setArtistData] = useState();
+    // const [artistTopSongs, setArtistTopSongs] = useState();
+    // const [artistAlbums, setArtistAlbums] = useState();
 
     useEffect(() => {
       if(artist) {
@@ -78,56 +111,15 @@ export default function Artist() {
       }
     }, [artist])
 
-    useEffect(() => {
-        if (slug) {
-          GetArtist(access_token, slug).then((res) => setArtist(res));
-          GetArtistTopSongs(access_token, slug).then((res) => setArtistTopSongs(res));
-          GetArtistAlbums(access_token, slug).then((res) => setArtistAlbums(res));
-        }
+    // useEffect(() => {
+    //     if (slug) {
+    //       GetArtist(access_token, slug).then((res) => setArtist(res));
+    //       GetArtistTopSongs(access_token, slug).then((res) => console.log(res));
+    //       GetArtistTopSongs(access_token, slug).then((res) => setArtistTopSongs(res));
+    //       GetArtistAlbums(access_token, slug).then((res) => setArtistAlbums(res));
+    //     }
 
-      }, [slug]);
+    //   }, [slug]);
+    */
+ 
 
-
-  return (
-    <Box>
-      {artist && artistData && bg &&
-      <ContentContainer bg={bg}>
-
-        <GeneralPageLayout data={artistData} type={'artist'}>
-            <b>{artist.followers.total.toLocaleString("en-US")} </b> &nbsp;Followers
-        </GeneralPageLayout>
-
-        {artistTopSongs && 
-        <Box className={classes.playlistContainer} padding={"30px"}>
-
-          <Playbutton tracks={artistTopSongs.tracks} uri={artist.uri} />
-          <Box className={classes.topic}>Top Tracks</Box>
-          <Tracklist tracks={artistTopSongs.tracks.slice(0,5)} showDateAdded={false} isAlbum={false} />
-
-          {artistAlbums.items.length > 0 &&
-          <Box>
-            <Box className={classes.topic}>Albums</Box>
-            {artistAlbums && 
-            <Grid fluid spacing={2}>
-              <AlbumGrid albums={artistAlbums.items}/>
-            </Grid>}
-          </Box>}
-        </Box>}
-
-      </ContentContainer>}
-    </Box>
-  )
-}
-
-
-      // <Box className={classes.content}>    
-      //   <Box
-      //     sx={{
-      //     background: bg,
-      //     zIndex: "-999",
-      //     height: '100%',
-      //     width: '100%',
-      //     right: 0,
-      //     top: 0,
-      //     position: 'absolute'
-      //   }}></Box>

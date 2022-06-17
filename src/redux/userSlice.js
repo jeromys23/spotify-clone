@@ -12,6 +12,7 @@ export const userSlice = createSlice({
       state.access_token = action.payload.access_token;
       state.refresh_token = action.payload.refresh_token;
       state.expires_in = action.payload.expires_in;
+      localStorage.setItem("token", action.payload.access_token)
     },
   },
 });

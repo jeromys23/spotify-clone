@@ -1,29 +1,31 @@
 //React
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-
-//Axios
-import axios from "axios";
 
 //Material UI
 import { makeStyles } from "@material-ui/core/styles";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
-import SearchIcon from "@mui/icons-material/Search";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import AddBoxSharpIcon from "@mui/icons-material/AddBoxSharp";
+import ListIcon from '@mui/icons-material/List';
 import FavoriteSharpIcon from "@mui/icons-material/FavoriteSharp";
+import Box from "@material-ui/core/Box"
+import Hidden from "@material-ui/core/Hidden"
 
-//Redux
-import { useSelector } from "react-redux";
+//Components
+import Loading from "../components/loading"
+
+//GraphQL
+import { useQuery } from '@apollo/client';
+import {GetUserPlaylists} from "../graphql/navQuery";
+
 
 //Styles
 const styles = makeStyles({
   navbar: {
     position: "fixed",
-    width: "207.5px",
+    width: "225px",
     left: "0",
     top: "0",
-    height: "Calc(100vh - 105px)",
+    height: "Calc(100vh - 75px)",
     backgroundColor: "#121212",
     padding: '15px 0 0 15px',
     fontWeight: "bold",
@@ -49,7 +51,7 @@ const styles = makeStyles({
   playlistContainer: {
     paddingLeft: '10px',
     height: '20px',
-    paddingTop: '20px'
+    marginTop: '20px'
   },
   greyDivider: {
     height: "1px",
@@ -58,63 +60,90 @@ const styles = makeStyles({
   },
   icon: {
     color: "darkgrey",
+    fontSize: 27
   },
-  playlistLink: {
+  navbarLink: {
     color: 'inherit',
     textDecoration: 'none',
     transition: 'all 0.3s ease',
     "&:hover": {
       color: "rgb(250, 250, 250)"
     }
+  },
+  navActive: {
+    color: "rgb(250, 250, 250)"
+  },
+  mobileContainer: {
+    display: 'flex',
+    backgroundColor: "#121212",
+    fontWeight: "bold",
+    width: '100%',
+    color: "darkgrey",
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 0,
+    zIndex: 100
+  },
+  mobileNavItem : {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      display: 'flex',
   }
 });
 
+
 export default function Navbar() {
-  const access_token = useSelector((state) => state.user.access_token);
 
   //Styles
   const classes = styles();
 
-  //States
-  const [playlists, setPlaylists] = useState();
-  const [loading, setLoading] = useState(true);
+  //GraphQL Query for top songs and artists
+  const { loading, error, data } = useQuery(GetUserPlaylists)
 
-  useEffect(() => {
-    axios
-      .get("https://api.spotify.com/v1/me/playlists", { headers: {"Authorization" : `Bearer ${access_token}`}})
-      .then((res) => {
-        setPlaylists(res.data.items);
-        setLoading(false);
-      })
-      .catch((e) => {
-        console.error(e);
-      });
-  }, []);
+  if(loading) return <Loading/>
+  if(error) return null;
 
   return (
-    <div className={classes.navbar}>
-      <div>
-        <div className={classes.navContent}>
-          <HomeRoundedIcon sx={{ fontSize: 27 }} className={classes.icon} />
-          <div className={classes.navlinkContainer}>
-            <Link to={'/'} className={classes.playlistLink}><div className={classes.navlink}>Home</div></Link>
-          </div>
-        </div>
-        <div className={classes.navContent}>
-          <FavoriteSharpIcon sx={{ fontSize: 27 }} className={classes.icon} />
-          <div className={classes.navlinkContainer}>
-            <div className={classes.navlink}>Liked Songs</div>
-          </div>
-        </div>
-        <div className={classes.greyDivider}></div>
-      </div>
-      <div className={"bottomNav"}>
-        {!loading && playlists.map((playlist, i) => 
-        <div className={classes.playlistContainer} key={i}>
-            <Link to={`/playlist/${playlist.id}`} className={classes.playlistLink}><div>{playlist.name}</div></Link>
-        </div>
-        )}
-      </div>      
-    </div>
+    <React.Fragment>
+      <Hidden smDown>
+        <Box className={classes.navbar}>
+          <Box>
+            <Box className={classes.navContent}>
+              <HomeRoundedIcon className={classes.icon} />
+              <Box className={classes.navlinkContainer}>
+                <Link to={'/'} className={classes.navbarLink}><Box className={classes.navlink}>Home</Box></Link>
+              </Box>
+            </Box>
+            <Box className={classes.navContent}>
+              <FavoriteSharpIcon className={classes.icon} />
+              <Box className={classes.navlinkContainer}>
+                <Link to={'/likedsongs'} className={classes.navbarLink}><Box className={classes.navlink}>Liked Songs</Box></Link>
+              </Box>
+            </Box>
+            <Box className={classes.greyBoxider}></Box>
+          </Box>
+          <Box className={"bottomNav"}>
+          {data.UserPlaylists.items.map((playlist, i) => 
+            <Box className={classes.playlistContainer} key={i}>
+                <Link to={`/playlist/${playlist.id}`} className={classes.navbarLink}><Box>{playlist.name}</Box></Link>
+            </Box>
+            )}
+          </Box>      
+        </Box>
+      </Hidden>
+      <Hidden mdUp>
+        <Box className={classes.mobileContainer}>
+          <Box className={classes.mobileNavItem}>
+              <Link to={'/'}><HomeRoundedIcon fontSize={'large'}/></Link>
+          </Box>
+          <Box className={classes.mobileNavItem}>
+              <Link to={'/playlists'}><ListIcon fontSize={'large'}/></Link>
+          </Box>
+        </Box>
+      </Hidden>
+    </React.Fragment>
   );
 }
