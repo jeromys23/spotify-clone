@@ -1,36 +1,34 @@
-import { gql } from "@apollo/client";
+import { gql } from '@apollo/client';
 
 export const GetAlbumInfo = gql`
-  query AlbumQuery($albumId: String) {
-    Album(id: $albumId) {
-        id
-        images {
-            url
-            height
-            width
-        }
-        name
-        uri
-        release_date
-        artists {
-            name
+    query AlbumQuery($albumId: String) {
+        Album(id: $albumId) {
             id
-        }
-        tracks {
-            items {
+            images {
+                url
+                height
+                width
+            }
+            name
+            uri
+            release_date
+            artists {
                 name
-                artists {
+                id
+            }
+            tracks {
+                items {
                     name
+                    artists {
+                        name
+                        id
+                    }
+                    duration_ms
+                    id
+                    uri
                     id
                 }
-                duration_ms
-                id
-                uri
             }
         }
     }
-  }
-
 `;
-
-

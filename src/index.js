@@ -1,58 +1,60 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import "./index.css";
-import App from "./App";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import App from './App';
 
 //Redux
-import store from "./redux/store";
-import { Provider, useSelector } from "react-redux";
+import store from './redux/store';
+import { Provider } from 'react-redux';
 
 //GraphQL
 import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  createHttpLink
-} from "@apollo/client";
+    ApolloClient,
+    InMemoryCache,
+    ApolloProvider,
+    createHttpLink,
+} from '@apollo/client';
 
 import { setContext } from '@apollo/client/link/context';
 
-
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4000/graphql',
+    uri:
+        process.env.NODE_ENV === 'production'
+            ? 'https://spotify-clone-graphql.herokuapp.com/graphql'
+            : 'http://localhost:4000/graphql',
 });
 
 const authLink = setContext((_, { headers }) => {
-  // get the authentication token from local storage if it exists
-  const token = localStorage.getItem('token');
-  // return the headers to the context so httpLink can read them
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-    }
-  }
+    // get the authentication token from local storage if it exists
+    const token = localStorage.getItem('token');
+    // return the headers to the context so httpLink can read them
+    return {
+        headers: {
+            ...headers,
+            authorization: token ? `Bearer ${token}` : '',
+        },
+    };
 });
 
-
-
 const client = new ApolloClient({
-  uri: 'http://localhost:4000/',
-  cache: new InMemoryCache(),
-  link: authLink.concat(httpLink),
-
+    uri:
+        process.env.NODE_ENV === 'production'
+            ? 'https://spotify-clone-graphql.herokuapp.com/'
+            : 'http://localhost:4000/',
+    cache: new InMemoryCache(),
+    link: authLink.concat(httpLink),
 });
 
 ReactDOM.render(
-  <React.StrictMode>
-      <Provider store={store}>
-        <ApolloProvider client={client}>
-          <App />
-        </ApolloProvider>
-      </Provider>
-  </React.StrictMode>,
+    <React.StrictMode>
+        <Provider store={store}>
+            <ApolloProvider client={client}>
+                <App />
+            </ApolloProvider>
+        </Provider>
+    </React.StrictMode>,
 
-  document.getElementById("root")
+    document.getElementById('root')
 );
 
 // If you want to start measuring performance in your app, pass a function
