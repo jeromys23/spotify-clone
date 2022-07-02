@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { PlayCircle } from '@mui/icons-material';
+import PlayCircle from '@mui/icons-material/PlayCircle';
 import Box from '@mui/material/Box';
 
 import { useDispatch } from 'react-redux';

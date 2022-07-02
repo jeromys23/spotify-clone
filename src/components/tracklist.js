@@ -15,7 +15,7 @@ import { Link } from 'react-router-dom';
 
 //Redux
 import { useDispatch, useSelector } from 'react-redux';
-import { setCurrentSong, setShouldPlay, setURI } from '../redux/spotifySlice';
+import { setShouldPlay, setURI } from '../redux/spotifySlice';
 
 //GraphQL
 import { useLazyQuery } from '@apollo/client';
