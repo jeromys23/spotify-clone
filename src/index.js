@@ -17,11 +17,12 @@ import {
 
 import { setContext } from '@apollo/client/link/context';
 
+const httpURI =
+    process.env.REACT_APP_GRAPHQLENDPOINT || 'http://localhost:4000/graphql';
+const clientURI = process.env.REACT_APP_GRAPHQLAPI || 'http://localhost:4000/';
+
 const httpLink = createHttpLink({
-    uri:
-        process.env.NODE_ENV === 'production'
-            ? 'https://spotify-clone-graphql.herokuapp.com/graphql'
-            : 'http://localhost:4000/graphql',
+    uri: httpURI,
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -37,10 +38,7 @@ const authLink = setContext((_, { headers }) => {
 });
 
 const client = new ApolloClient({
-    uri:
-        process.env.NODE_ENV === 'production'
-            ? 'https://spotify-clone-graphql.herokuapp.com/'
-            : 'http://localhost:4000/',
+    uri: clientURI,
     cache: new InMemoryCache(),
     link: authLink.concat(httpLink),
 });

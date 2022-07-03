@@ -16,9 +16,7 @@ const BASE_URL = 'https://api.spotify.com/v1';
 //Auth constants
 const authEndpoint = 'https://accounts.spotify.com/authorize';
 const redirect_uri =
-    process.env.NODE_ENV === 'production'
-        ? 'https://jfs-spotify-clone.herokuapp.com/'
-        : 'http://localhost:3000/';
+    process.env.REACT_APP_CALLBACKURI || 'http://localhost:3000/';
 const client_id = '08bc0a4718424de49cf7175abb26b7d5';
 const client_secret = '3ed8fa77ec9141fbbe5c4513cc978235';
 
