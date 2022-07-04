@@ -25,6 +25,7 @@ import { GetTrackData } from '../graphql/trackQuery';
 const styles = makeStyles({
     songArtistContainer: {
         display: 'flex',
+        height: '100%',
     },
     tableText: {
         color: '#CCC',
@@ -38,6 +39,11 @@ const styles = makeStyles({
     },
     trackTable: {
         fontSize: '14px',
+    },
+    trackImageContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        height: '100%',
     },
     trackImage: {
         height: '45px',
@@ -204,7 +210,7 @@ export default function Tracklist(props) {
                                             {!props.isAlbum && (
                                                 <Box
                                                     className={
-                                                        classes.trackImage
+                                                        classes.trackImageContainer
                                                     }
                                                 >
                                                     <img

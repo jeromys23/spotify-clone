@@ -29,6 +29,7 @@ const styles = makeStyles((theme) => ({
     player: {
         color: '#CCCCCC',
         position: 'fixed',
+        justifyContent: 'space-between',
         width: '100vw',
         zIndex: 99,
         borderTop: '1px solid #303030',
@@ -41,8 +42,6 @@ const styles = makeStyles((theme) => ({
         height: '100%',
         alignItems: 'center',
         gap: '20px',
-        padding: '0 30px',
-        position: 'absolute',
         top: 0,
         left: 0,
     },
@@ -56,8 +55,9 @@ const styles = makeStyles((theme) => ({
         cursor: 'pointer',
     },
     playerControls: {
-        flex: 1,
         display: 'flex',
+        flex: 1,
+        minWidth: '100px',
         flexDirection: 'column',
         gap: '10px',
         justifyContent: 'center',
@@ -71,13 +71,6 @@ const styles = makeStyles((theme) => ({
         cursor: 'pointer',
         fontSize: '40px !important',
         color: '#fff',
-    },
-    progressBar: {
-        width: '100%',
-        maxWidth: '500px',
-        height: '2px',
-        borderRadius: '1px',
-        background: '#CCCCCC',
     },
 }));
 
@@ -97,25 +90,6 @@ export default function Player() {
     const access_token = useSelector((state) => state.user.access_token);
     const deviceId = useSelector((state) => state.spotify.deviceId);
     const globalURI = useSelector((state) => state.spotify.URI);
-
-    //GraphQL query
-    // const [CurrentlyPlaying, { loading, error, data }] = useLazyQuery(
-    //     GetCurrentlyPlaying,
-    //     {
-    //         onCompleted: (data) => {
-    //             if (data.CurrentlyPlaying.item) {
-    //                 dispatch(setCurrentSong(data.CurrentlyPlaying.item));
-    //             }
-    //         },
-    //         onError: (err) => {
-    //             console.error(
-    //                 'Error ocurred when fetching currently playing. Likely nothing is playing. Error: ' +
-    //                     err.message
-    //             );
-    //         },
-    //         fetchPolicy: 'network-only',
-    //     }
-    // );
 
     const [player, setPlayer] = useState();
     const [isActive, setIsActive] = useState(false);
@@ -238,7 +212,13 @@ export default function Player() {
             style={{ bottom: matches ? '60px' : '0' }}
         >
             {/* Image and playback box */}
-            <Box className={classes.currentSongContainer}>
+            <Box
+                className={classes.currentSongContainer}
+                style={{
+                    position: matches ? 'relative' : 'absolute',
+                    padding: matches ? '0 0 0 10px' : '0 30px',
+                }}
+            >
                 <Box>
                     <img
                         src={
@@ -247,11 +227,11 @@ export default function Player() {
                             ].url
                         }
                         alt={currentSong.name}
-                        width={64}
-                        height={64}
+                        width={matches ? 50 : 64}
+                        height={matches ? 50 : 64}
                     />
                 </Box>
-                <Box width={300}>
+                <Box maxWidth={300}>
                     <Box color={'#fff'} fontSize={'14px'}>
                         {currentSong.name}
                     </Box>
@@ -281,9 +261,11 @@ export default function Player() {
             {/* Playback controls */}
             <Box className={classes.playerControls}>
                 <Box sx={{ display: 'flex', gap: '10px' }}>
-                    <Box onClick={() => Previous()}>
-                        <SkipPreviousIcon className={classes.controlIcon} />
-                    </Box>
+                    {!matches && (
+                        <Box onClick={() => Previous()}>
+                            <SkipPreviousIcon className={classes.controlIcon} />
+                        </Box>
+                    )}
                     {shouldPlay ? (
                         <Box onClick={() => Pause()}>
                             <PauseCircleIcon className={classes.playPause} />
@@ -293,9 +275,11 @@ export default function Player() {
                             <PlayCircleIcon className={classes.playPause} />
                         </Box>
                     )}
-                    <Box onClick={() => Next()}>
-                        <SkipNextIcon className={classes.controlIcon} />
-                    </Box>
+                    {!matches && (
+                        <Box onClick={() => Next()}>
+                            <SkipNextIcon className={classes.controlIcon} />
+                        </Box>
+                    )}
                 </Box>
             </Box>
         </Box>
