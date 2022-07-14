@@ -147,3 +147,43 @@ export const PausePlayer = async (access_token, deviceId) => {
         .then((res) => res.data)
         .catch((err) => console.error(err));
 };
+
+/**
+ * Transfers the playback to the supplied deviceID
+ * @param {*} access_token
+ * @param {*} deviceId
+ * @returns
+ */
+export const TransferPlayback = async (access_token, deviceId) => {
+    return axios
+        .put(
+            BASE_URL + `/me/player`,
+            {
+                device_ids: [deviceId],
+            },
+            {
+                headers: { Authorization: `Bearer ${access_token}` },
+            }
+        )
+        .then((res) => res.data)
+        .catch((err) => console.error(err));
+};
+
+/**
+ * Puts an item in the queue for the player
+ * @param {*} access_token
+ * @param {*} deviceId
+ * @returns
+ */
+export const QueueURI = async (access_token, device_id, uri) => {
+    return axios
+        .post(
+            BASE_URL + `/me/player/queue?uri=${uri}&device_id=${device_id}`,
+            null,
+            {
+                headers: { Authorization: `Bearer ${access_token}` },
+            }
+        )
+        .then((res) => res.data)
+        .catch((err) => console.error(err));
+};

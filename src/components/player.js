@@ -11,7 +11,12 @@ import {
 } from '../redux/spotifySlice';
 
 //Player commands
-import { PlayPlayerContext, PausePlayer } from '../util/spotifyHelper';
+import {
+    PlayPlayerContext,
+    PausePlayer,
+    TransferPlayback,
+    QueueURI,
+} from '../util/spotifyHelper';
 
 //Material UI
 import { makeStyles } from '@material-ui/core';
@@ -28,6 +33,7 @@ import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 const styles = makeStyles((theme) => ({
     player: {
         color: '#CCCCCC',
+        background: 'var(--black)',
         position: 'fixed',
         justifyContent: 'space-between',
         width: '100vw',
@@ -90,6 +96,8 @@ export default function Player() {
     const access_token = useSelector((state) => state.user.access_token);
     const deviceId = useSelector((state) => state.spotify.deviceId);
     const globalURI = useSelector((state) => state.spotify.URI);
+    const isIOS = true;
+    // /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
     const [player, setPlayer] = useState();
     const [isActive, setIsActive] = useState(false);
@@ -101,7 +109,6 @@ export default function Player() {
                 .then(() => console.log('paused'))
                 .catch(() => PausePlayer(access_token, deviceId));
         } else {
-            console.log('pausing through api');
             PausePlayer(access_token, deviceId);
         }
     };
@@ -115,7 +122,7 @@ export default function Player() {
     };
 
     const Next = () => {
-        //If the uri is a
+        //If the uri is a track
         if (IsTrackURI(globalURI)) {
             const artistURI = currentSong.artists[0].uri;
             if (artistURI) {
@@ -127,18 +134,34 @@ export default function Player() {
     };
 
     const Resume = () => {
-        if (isActive) {
-            player &&
-                player
-                    .resume()
+        if (isIOS) {
+            if (isActive) {
+                player.resume().catch();
+            } else {
+                TransferPlayback(access_token, deviceId)
                     .then(() => {
-                        console.log('resumed');
+                        player.resume().then(() => console.log('resumed'));
                     })
-                    .catch(() => {
-                        PlayPlayerContext(access_token, deviceId, globalURI);
-                    });
+                    .catch((err) => console.error(err));
+            }
         } else {
-            PlayPlayerContext(access_token, deviceId, globalURI);
+            if (isActive) {
+                player &&
+                    player
+                        .resume()
+                        .then(() => {
+                            console.log('resumed');
+                        })
+                        .catch(() => {
+                            PlayPlayerContext(
+                                access_token,
+                                deviceId,
+                                globalURI
+                            );
+                        });
+            } else {
+                PlayPlayerContext(access_token, deviceId, globalURI);
+            }
         }
     };
 
@@ -173,10 +196,6 @@ export default function Player() {
                     }
                 }
                 state && dispatch(setShouldPlay(!state.paused));
-
-                player.getCurrentState().then((state) => {
-                    !state ? setIsActive(false) : setIsActive(true);
-                });
             });
 
             // Not Ready
@@ -201,7 +220,31 @@ export default function Player() {
     }, []);
 
     useEffect(() => {
-        if (shouldPlay) PlayPlayerContext(access_token, deviceId, globalURI);
+        if (!isActive) {
+            if (shouldPlay) setIsActive(true);
+        }
+    }, [shouldPlay]);
+
+    useEffect(() => {
+        if (shouldPlay) {
+            if (isIOS) {
+                if (isActive) {
+                    PlayPlayerContext(access_token, deviceId, globalURI);
+                } else {
+                    TransferPlayback(access_token, deviceId)
+                        .then(() => {
+                            PlayPlayerContext(
+                                access_token,
+                                deviceId,
+                                globalURI
+                            );
+                        })
+                        .catch((err) => console.error(err));
+                }
+            } else {
+                PlayPlayerContext(access_token, deviceId, globalURI);
+            }
+        }
     }, [globalURI]);
 
     if (!currentSong) return null;
