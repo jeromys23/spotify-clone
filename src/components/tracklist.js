@@ -1,4 +1,4 @@
-import React, { lazy, useState } from 'react';
+import React, { lazy, useEffect, useState } from 'react';
 
 //MUI
 import { makeStyles } from '@material-ui/core/styles';
@@ -129,7 +129,10 @@ export default function Tracklist(props) {
                 <tbody>
                     <tr className={classes.tableHeader}>
                         <th
-                            style={{ width: '7%', paddingLeft: '10px' }}
+                            style={{
+                                width: matches ? '7%' : '4%',
+                                paddingLeft: '10px',
+                            }}
                             className={classes.tableHeaderText}
                         >
                             #
@@ -165,7 +168,7 @@ export default function Tracklist(props) {
                             row && (
                                 <tr
                                     key={i}
-                                    className={classes.trackRow}
+                                    className={matches ? classes.trackRow : ''}
                                     style={{
                                         color:
                                             row.id == currentSong.id
@@ -187,6 +190,7 @@ export default function Tracklist(props) {
                                     >
                                         <Box width={'25px'}>
                                             {i == hoverRow &&
+                                            matches &&
                                             i != playingRow ? (
                                                 <PlayArrow />
                                             ) : (

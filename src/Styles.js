@@ -8,7 +8,7 @@ const useGlobalStyles = makeStyles((theme) => ({
     topic: {
         fontSize: '25px',
         fontWeight: 'bold',
-        margin: '25px 0 20px 0',
+        margin: '35px 0',
     },
     playlistContainer: {
         background: 'rgba(0, 0, 0, 0.25)',
@@ -27,11 +27,11 @@ const useGlobalStyles = makeStyles((theme) => ({
     },
     playButtonContainer: {
         height: '50px',
-        marginTop: '20px',
-        marginLeft: '20px',
         marginBottom: '20px',
+        marginTop: '35px',
+        marginLeft: '20px',
         [theme.breakpoints.down('xs')]: {
-            height: '35px',
+            height: '60px',
         },
     },
 }));

@@ -12,32 +12,39 @@ const styles = makeStyles((theme) => ({
     header: {
         fontSize: '90px',
         [theme.breakpoints.down('sm')]: {
-            fontSize: '40px',
+            fontSize: '50px',
         },
         fontWeight: 'bold',
         position: 'relative',
-        paddingBottom: '20px',
+        padding: '10px 0',
     },
     playlistImage: {
         boxShadow: '0 0 25px #101010',
     },
     topHeader: {
+        alignItems: 'center',
         display: 'flex',
-        paddingTop: '80px',
+        gap: '20px',
+        padding: '80px 30px',
         [theme.breakpoints.down('xs')]: {
-            paddingBottom: '80px',
+            padding: '50px 30px',
         },
     },
     metadata: {
         display: 'flex',
         flexDirection: 'column',
-        paddingLeft: '30px',
     },
     type: {
         textTransform: 'uppercase',
         color: '#CCC',
         fontWeight: 'bold',
         fontSize: '14px',
+    },
+    metaContainer: {
+        display: 'flex',
+        width: '100%',
+        position: 'relative',
+        alignItems: 'center',
     },
 }));
 
@@ -58,7 +65,7 @@ export default function GeneralPageLayout(props) {
     }, [matches]);
 
     return (
-        <Box className={classes.topHeader} px={'30px'} paddingBottom={'30px'}>
+        <Box className={classes.topHeader}>
             {props.data.image && (
                 <Box
                     className={classes.playlistImage}
@@ -73,7 +80,7 @@ export default function GeneralPageLayout(props) {
                     />
                 </Box>
             )}
-            <Box position={'relative'} width={'100%'}>
+            <Box className={classes.metaContainer}>
                 <Box className={classes.metadata}>
                     <Box className={classes.type}>{props.type}</Box>
                     <Box className={classes.header}>{props.data.name}</Box>

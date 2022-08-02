@@ -51,6 +51,7 @@ export const GetArtistInfo = gql`
                     height
                     width
                 }
+                release_date
             }
         }
     }
