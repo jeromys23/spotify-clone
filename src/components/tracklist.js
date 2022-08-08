@@ -1,4 +1,4 @@
-import React, { lazy, useEffect, useState } from 'react';
+import React, { lazy, useState } from 'react';
 
 //MUI
 import { makeStyles } from '@material-ui/core/styles';
@@ -16,10 +16,6 @@ import { Link } from 'react-router-dom';
 //Redux
 import { useDispatch, useSelector } from 'react-redux';
 import { setShouldPlay, setURI } from '../redux/spotifySlice';
-
-//GraphQL
-import { useLazyQuery } from '@apollo/client';
-import { GetTrackData } from '../graphql/trackQuery';
 
 //styles
 const styles = makeStyles({
@@ -94,24 +90,12 @@ const styles = makeStyles({
 export default function Tracklist(props) {
     const classes = styles();
     const [hoverRow, setHoverRow] = useState(-1);
-    const [playingRow, setPlayingRow] = useState(-1);
+    const [playingRow] = useState(-1);
     const theme = useTheme();
     const matches = useMediaQuery(theme.breakpoints.up('sm'));
 
     const dispatch = useDispatch();
-    const globalURI = useSelector((state) => state.spotify.URI);
     const currentSong = useSelector((state) => state.spotify.currentSong);
-
-    //GraphQL query
-    const [getSongData, { loading, error, data }] = useLazyQuery(GetTrackData, {
-        onCompleted: (data) => {
-            if (data.TrackData && data.TrackData.uri !== globalURI) {
-                dispatch(setURI(data.TrackData.uri));
-                // dispatch(setCurrentSong(data.TrackData));
-            }
-        },
-        fetchPolicy: 'network-only',
-    });
 
     const handlePlay = (event, uri) => {
         //Check if we are clicking anchor tag to artist or album
@@ -171,7 +155,7 @@ export default function Tracklist(props) {
                                     className={matches ? classes.trackRow : ''}
                                     style={{
                                         color:
-                                            row.id == currentSong.id
+                                            row.id === currentSong.id
                                                 ? 'var(--green)'
                                                 : '',
                                     }}
@@ -189,9 +173,9 @@ export default function Tracklist(props) {
                                         }}
                                     >
                                         <Box width={'25px'}>
-                                            {i == hoverRow &&
+                                            {i === hoverRow &&
                                             matches &&
-                                            i != playingRow ? (
+                                            i !== playingRow ? (
                                                 <PlayArrow />
                                             ) : (
                                                 i + 1
@@ -237,7 +221,7 @@ export default function Tracklist(props) {
                                                     className={classes.rowName}
                                                     style={{
                                                         color:
-                                                            row.id ==
+                                                            row.id ===
                                                             currentSong.id
                                                                 ? 'var(--green)'
                                                                 : '#fff',

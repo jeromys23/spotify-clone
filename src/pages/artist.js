@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 //To get id from url
 import { useParams } from 'react-router-dom';

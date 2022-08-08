@@ -15,7 +15,6 @@ import {
     PlayPlayerContext,
     PausePlayer,
     TransferPlayback,
-    QueueURI,
 } from '../util/spotifyHelper';
 
 //Material UI
@@ -136,7 +135,7 @@ export default function Player() {
     const Resume = () => {
         if (isIOS) {
             if (isActive) {
-                player.resume().catch();
+                player.resume();
             } else {
                 TransferPlayback(access_token, deviceId)
                     .then(() => {
@@ -233,11 +232,7 @@ export default function Player() {
                 } else {
                     TransferPlayback(access_token, deviceId)
                         .then(() => {
-                            PlayPlayerContext(
-                                access_token,
-                                deviceId,
-                                globalURI
-                            );
+                            player.resume().then(() => console.log('resumed'));
                         })
                         .catch((err) => console.error(err));
                 }
