@@ -160,6 +160,7 @@ export const TransferPlayback = async (access_token, deviceId) => {
             BASE_URL + `/me/player`,
             {
                 device_ids: [deviceId],
+                play: true,
             },
             {
                 headers: { Authorization: `Bearer ${access_token}` },
