@@ -237,7 +237,9 @@ export default function Player() {
                                 access_token,
                                 deviceId,
                                 globalURI
-                            );
+                            ).then(() => {
+                                player.resume();
+                            });
                         })
                         .catch((err) => console.error(err));
                 }
