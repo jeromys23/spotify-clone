@@ -14,6 +14,7 @@ const styles = makeStyles({
     image: {
         width: 190,
         height: 190,
+        marginTop: 20,
     },
     paper: {
         display: 'flex',
@@ -22,15 +23,13 @@ const styles = makeStyles({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#131313',
-        paddingTop: '20px',
         width: '250px',
-        paddingBottom: '20px',
         transition: 'all 0.3s ease',
     },
     title: {
         textAlign: 'left',
         marginTop: '20px',
-        marginBottom: '5px',
+        marginBottom: '20px',
         width: '190px',
         color: '#fff',
     },
