@@ -1,4 +1,4 @@
-import React, { lazy, useState } from 'react';
+import React, { lazy, useEffect, useState } from 'react';
 
 //MUI
 import { makeStyles } from '@material-ui/core/styles';
@@ -106,6 +106,17 @@ export default function Tracklist(props) {
             dispatch(setURI(uri));
         }
     };
+
+    useEffect(() => {
+        function handleResize() {
+            const doc = document.documentElement;
+            doc.style.setProperty('--app-height', `${window.innerHeight}px`);
+        }
+
+        window.addEventListener('resize', handleResize);
+        handleResize();
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     return (
         <Box className={classes.trackTable}>

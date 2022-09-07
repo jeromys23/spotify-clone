@@ -34,7 +34,9 @@ const styles = makeStyles((theme) => ({
  */
 export default function ContentContainer(props) {
     const [bg, setBg] = useState();
-    const [height, setHeight] = useState('calc(100vh - var(--player-height))');
+    const [height, setHeight] = useState(
+        'calc(var(--app-height) - var(--player-height))'
+    );
     const theme = useTheme();
     const matches = useMediaQuery(theme.breakpoints.down('sm'));
     const fac = new FastAverageColor();
@@ -50,9 +52,9 @@ export default function ContentContainer(props) {
     }, []);
 
     useEffect(() => {
-        setHeight('calc(100vh - var(--player-height))');
+        setHeight('calc(var(--app-height) - var(--player-height))');
         if (matches) {
-            setHeight('calc(100vh - var(--player-height-mobile))');
+            setHeight('calc(var(--app-height) - var(--player-height-mobile))');
         }
     }, [matches]);
 
