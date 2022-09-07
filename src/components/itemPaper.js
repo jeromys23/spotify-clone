@@ -26,10 +26,6 @@ const styles = makeStyles({
         width: '250px',
         paddingBottom: '20px',
         transition: 'all 0.3s ease',
-        '&:hover': {
-            backgroundColor: 'rgba(50,50,50, 0.3)',
-            cursor: 'pointer',
-        },
     },
     title: {
         textAlign: 'left',
@@ -82,7 +78,7 @@ export default function ItemPaper({ image, title, metadata, url, uri }) {
             )}
 
             <Link to={url} className={classes.link}>
-                <Paper elevation={3} className={classes.paper}>
+                <Paper elevation={3} className={`${classes.paper} paper`}>
                     <img
                         src={image}
                         alt={title}

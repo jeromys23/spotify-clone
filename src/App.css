@@ -50,4 +50,11 @@ a {
   text-decoration: none;
 }
 
+@media(hover: hover) and (pointer: fine) {
+  .paper:hover {
+    background-color: rgba(50,50,50, 0.3);
+    cursor: pointer;
+  }
+}
+
 
