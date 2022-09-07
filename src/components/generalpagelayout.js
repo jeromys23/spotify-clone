@@ -12,11 +12,14 @@ const styles = makeStyles((theme) => ({
     header: {
         fontSize: '90px',
         [theme.breakpoints.down('sm')]: {
-            fontSize: '50px',
+            fontSize: '8vw',
         },
         fontWeight: 'bold',
         position: 'relative',
         padding: '10px 0',
+        minWidth: 0,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
     },
     playlistImage: {
         boxShadow: '0 0 25px #101010',
@@ -33,6 +36,7 @@ const styles = makeStyles((theme) => ({
     metadata: {
         display: 'flex',
         flexDirection: 'column',
+        minWidth: 0,
     },
     type: {
         textTransform: 'uppercase',
@@ -41,6 +45,7 @@ const styles = makeStyles((theme) => ({
         fontSize: '14px',
     },
     metaContainer: {
+        minWidth: 0,
         display: 'flex',
         width: '100%',
         position: 'relative',

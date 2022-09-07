@@ -16,6 +16,7 @@
 
 body {
   background-color: var(--black);
+  padding-bottom: env(safe-area-inset-bottom);
   color: var(--white);
   font-family: "Raleway", sans-serif !important;
 }
