@@ -1,3 +1,9 @@
+#Spotify Clone
+
+This project depends on a GraphQL server, which can be found at the following URL: https://github.com/jeromys23/spotify-clone-graphql
+
+If the project is ran locally, `index.js` will be where to set the port of the locally running GraphQL server. Make sure to change this to the correct port or none of the API calls will succeed. 
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
