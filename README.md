@@ -1,4 +1,4 @@
-#Spotify Clone
+# Spotify Clone
 
 This project depends on a GraphQL server, which can be found at the following URL: https://github.com/jeromys23/spotify-clone-graphql
 
