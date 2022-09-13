@@ -60,6 +60,7 @@ export default function Playlists() {
                                         .url
                                 }
                                 alt={playlist.name}
+                                loading={'lazy'}
                             />
                         </Box>
                         <Box className={classes.playlistText}>
